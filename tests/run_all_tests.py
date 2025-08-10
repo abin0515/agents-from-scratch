@@ -6,6 +6,8 @@ import argparse
 from pathlib import Path
 
 def main():
+    from dotenv import load_dotenv
+    load_dotenv(".env.example")
     # LangSmith suite / project name
     langsmith_project = "E-mail Tool Calling and Response Evaluation"
 

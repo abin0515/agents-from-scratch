@@ -18,7 +18,7 @@ from email_assistant.utils import extract_tool_calls, format_messages_string
 from email_assistant.eval.prompts import RESPONSE_CRITERIA_SYSTEM_PROMPT
 
 from dotenv import load_dotenv
-load_dotenv(".env", override=True)
+load_dotenv(".env.example", override=True)
 
 # Force reload the email_dataset module to ensure we get the latest version
 if "email_assistant.eval.email_dataset" in sys.modules:

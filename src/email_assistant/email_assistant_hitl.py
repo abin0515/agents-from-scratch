@@ -12,7 +12,7 @@ from email_assistant.schemas import State, RouterSchema, StateInput
 from email_assistant.utils import parse_email, format_for_display, format_email_markdown
 from dotenv import load_dotenv
 
-load_dotenv(".env")
+load_dotenv(".env.example")
 
 # Get tools
 tools = get_tools(["write_email", "schedule_meeting", "check_calendar_availability", "Question", "Done"])

@@ -163,10 +163,26 @@ async def ingest_email_to_langgraph(email_data, graph_name, url="http://127.0.0.
         try:
             # List all runs for this thread
             runs = await client.runs.list(thread_id)
-            
+
+            # Normalize to an iterable of run entries
+            iterable_runs = runs if isinstance(runs, list) else runs.get("runs", [])
+
             # Delete all previous runs to avoid state accumulation
-            for run_info in runs:
-                run_id = run_info.id
+            for run_info in iterable_runs:
+                # Support both dict responses and objects with attributes
+                if isinstance(run_info, dict):
+                    run_id = (
+                        run_info.get("id")
+                        or run_info.get("run_id")
+                        or (run_info.get("config", {}) if isinstance(run_info.get("config"), dict) else {}).get("run_id")
+                    )
+                else:
+                    run_id = getattr(run_info, "id", None) or getattr(run_info, "run_id", None)
+
+                if not run_id:
+                    print("Skipping a run entry without an identifiable id")
+                    continue
+
                 print(f"Deleting previous run {run_id} from thread {thread_id}")
                 try:
                     await client.runs.delete(thread_id, run_id)
@@ -272,6 +288,11 @@ async def fetch_and_process_emails(args):
             )
             
             processed_count += 1
+
+            # Optional throttle to reduce OpenAI TPM spikes from concurrent runs
+            if getattr(args, "sleep_seconds", 0) and args.sleep_seconds > 0:
+                print(f"Sleeping {args.sleep_seconds}s to throttle next submission...")
+                await asyncio.sleep(args.sleep_seconds)
             
         print(f"\nProcessed {processed_count} emails successfully")
         return 0
@@ -327,6 +348,12 @@ def parse_args():
         "--skip-filters",
         action="store_true",
         help="Skip filtering of emails"
+    )
+    parser.add_argument(
+        "--sleep-seconds",
+        type=float,
+        default=0.0,
+        help="Sleep this many seconds between submitting runs to the assistant to avoid rate-limit bursts"
     )
     return parser.parse_args()
 

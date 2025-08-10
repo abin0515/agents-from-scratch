@@ -68,6 +68,8 @@ langgraph dev
 2. Run the ingestion script in another terminal with desired parameters:
 
 ```bash
+# Optional: use a lighter model to reduce OpenAI TPM usage
+export EMAIL_ASSISTANT_MODEL=openai:gpt-4o-mini
 python src/email_assistant/tools/gmail/run_ingest.py --email lance@langgraph.dev --minutes-since 1000
 ```
 
@@ -94,6 +96,9 @@ python src/email_assistant/tools/gmail/run_ingest.py --email lance@langgraph.dev
   - Use the `--skip-filters` flag to include all messages (not just the latest in a thread, and including ones you sent)
   - Try running with all options to process everything: `--include-read --skip-filters --minutes-since 1000`
   - Use the `--mock` flag to test the system with simulated emails
+  - 429 rate limits from OpenAI? The app automatically retries with backoff. To avoid hitting limits:
+    - Set `EMAIL_ASSISTANT_MODEL` to a lighter model (e.g., `openai:gpt-4o-mini`)
+    - Reduce throughput by running fewer emails at once (use `--early`) or staggering runs
 
 ### 2. Connect to Agent Inbox
 

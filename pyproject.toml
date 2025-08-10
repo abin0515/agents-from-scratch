@@ -22,6 +22,9 @@ dependencies = [
     "pyppeteer",
     "html2text",
     "rich",
+    "fastapi",
+    "uvicorn",
+    
 ]
 
 [project.optional-dependencies]
